@@ -7,7 +7,7 @@ const productRoutes = require("./routes/productRoutes.js");
 
 const cors = require("cors");
 
-const port = 3003;
+const port = 4001;
 
 const app = express();
 
@@ -28,8 +28,8 @@ app.use(express.urlencoded({extended : true}));
 
 // Allows all resources to access our backend application
 app.use(cors());
-app.use("/users", userRoutes);
-app.use("/products", productRoutes);
+app.use("/b1/users", userRoutes);
+app.use("/b1/products", productRoutes);
 
 
 app.listen(port, () => {
