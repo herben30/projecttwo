@@ -252,7 +252,7 @@ module.exports.checkOut = async (req, res) => {
    // Clear the user's cart after checkout
    await userCart.deleteOne();
 
-   res.status(200).json({ message: 'Order placed successfully', order });
+   res.status(200).json({ message: 'Order placed successfully'});//, order 
  } catch (error) {
    console.error(error);
    res.status(500).json({ error: 'Internal Server Error' });
