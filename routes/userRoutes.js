@@ -37,7 +37,7 @@ router.get('/cart', verify, userControllers.getCart); //done
 router.delete('/:productId',verify, userControllers.removeFromCart); //done
 
 //route to checkout the user's cart
-router.delete('/checkout', verify, userControllers.checkOut);
+router.post('/checkout', verify, userControllers.checkOut);
 
 //route to retrieve the user's order
 router.get('/order', verify, userControllers.getOrder);
