@@ -266,12 +266,14 @@ module.exports.getOrder = (request, response) => {
     let user = request.user;
 
         // Use Promise.all to execute both queries concurrently
-        Promise.all([
-            Order.find({ userId: user.id }),
-            Order.countDocuments({ userId: user.id })
-        ])
-            .then(([orders, count]) => {
-                return response.send({ message: `You have a total of ${count} order/s.`, orders });
+            /*Promise.all([
+    ,
+                Order.countDocuments({ userId: user.id })
+            ])
+    , count*/
+            Order.find({ userId: user.id })
+            .then((result) => {
+                return response.send(result);//{ message: `You have a total of ${count} order/s.`, orders }
             })
             .catch((error) => response.send("There was an error encountered during the user's order retrieval!"));
 };

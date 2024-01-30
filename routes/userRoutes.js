@@ -37,16 +37,16 @@ router.get('/cart', verify, userControllers.getCart); //done
 router.delete('/:productId',verify, userControllers.removeFromCart); //done
 
 //route to checkout the user's cart
-router.post('/checkout', verify, userControllers.checkOut);
+router.post('/checkout', verify, userControllers.checkOut); //done
 
 //route to retrieve the user's order
 router.get('/order', verify, userControllers.getOrder);
 
-//route to update the status of user's order.
-router.put('/orderstatus/:orderId', verify, verifyAdmin, userControllers.updateOrderStatus);
-
 //route to update the quanties customer cart
 router.put('/change-quantities', verify, userControllers.updateCartQuantity);
+
+//route to update the status of user's order.
+router.put('/orderstatus/:orderId', verify, verifyAdmin, userControllers.updateOrderStatus);
 
 //route to retrive every user's order
 router.get('/allOrders', verify, verifyAdmin, userControllers.getAllOrders);
