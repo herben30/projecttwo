@@ -16,6 +16,9 @@ router.get("/all", verify, verifyAdmin, productControllers.getAllProducts);
 //route to retrieve all active products by any users.
 router.get("/active", productControllers.getAllActiveProducts);
 
+//route to search a product using name
+router.post('/search', productControllers.searchProductsByName);
+
 //route to retrive a specific product using id.
 router.get("/:productId", productControllers.getProduct);
 

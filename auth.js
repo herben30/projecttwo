@@ -17,13 +17,12 @@ module.exports.createAccessToken = (user) => {
 // token verification
 module.exports.verify = (request, response, next) => {
 	let token = request.headers.authorization;
-	console.log(token);
+	
 
 	if(token === undefined){
 		return response.send("No token provided!")
 	}else{
 		token = token.slice(7, token.length);
-		console.log(token);
 
 		// Token decryption
 		jwt.verify(token, secret, (err, decodedToken) => {
@@ -33,10 +32,9 @@ module.exports.verify = (request, response, next) => {
 					message: err.message
 				})
 			}else{
-				console.log(decodedToken);
 
 				request.user = decodedToken;
-				console.log(request);
+			
 				next();
 			}
 		})

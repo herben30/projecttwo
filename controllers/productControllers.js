@@ -7,7 +7,7 @@ module.exports.addProduct = (request, response) => {
 	let reqBody = request.body;
 
 	const newProduct = new Product({
-	    productName: reqBody.name,
+	    productName: reqBody.productName,
 	    description: reqBody.description,
 	    price: reqBody.price
 	});
@@ -15,21 +15,20 @@ module.exports.addProduct = (request, response) => {
 	newProduct.save()
 	    .then(product => {
 	        // Product creation successful
-	        return response.send(`New Product ${reqBody.name} successfully added.`);
+	        return response.send(true);//`New Product ${reqBody.name} successfully added.`
 	    })
 	    .catch(error => {
 	        // Product creation failed
-	        return response.send("There's an error adding the new product.");
+	        return response.send(false);//"There's an error adding the new product."
 	    });
 };
 
 //Controller to retrieve all products by admin
 module.exports.getAllProducts = (request, response) => {
-	Product.find({})
-	  .select(' -userOrders')		
+	Product.find({})	
 	  .then(result => {
 	    if (result.length === 0) {
-	      response.send("No products found in the database.");
+	      response.send(false); //"No products found in the database."
 	    } else {
 	      response.send(result);
 	    }
@@ -40,8 +39,8 @@ module.exports.getAllProducts = (request, response) => {
 
 //Controller to retrieve all active products
 module.exports.getAllActiveProducts = (request, response) => {
-	Product.find({ isActive: true })
-	  .select('-isActive -userOrders') // Include isActive, exclude userOrders
+	Product.find({ isActive: true })/*
+	  .select('-isActive -userOrders') */// Include isActive, exclude userOrders
 	  .then(result => {
 	    if (result.length === 0) {
 	      response.send("No active products found in the database.");
@@ -56,8 +55,8 @@ module.exports.getAllActiveProducts = (request, response) => {
 module.exports.getProduct = (request, response) => {
 	let reqParams = request.params.productId;
 
-	Product.findById(reqParams)
-	  .select(' -userOrders')
+	Product.findById(reqParams)/*
+	  .select(' -userOrders')*/
 	  .then(result => {
 	    if (!result) {
 	      response.status(404).send("Product not found.");
@@ -82,9 +81,9 @@ module.exports.updateProduct = (request, response) => {
 
 	Product.findByIdAndUpdate(reqParams, updatedProduct).then(result => {
 		if(result){
-			return response.send(`The details for product ${reqBody.name} have been updated successfully.`);
+			return response.send(true);//`The details for product ${reqBody.name} have been updated successfully.`
 		}else{
-			return response.send("You failed to update the product details.");
+			return response.send(false); //"You failed to update the product details."
 		}
 	})
 	.catch(error => response.send(error));
@@ -96,23 +95,19 @@ module.exports.archiveProduct = (request, response) => {
 
     Product.findById(reqParams)
     .then(result => {
-
-    if(result.isActive === true){
-        let archivedProduct = {
-        		isActive: false	
-    }
-
-    Product.findByIdAndUpdate(reqParams, archivedProduct).then(result => {
-        if(result){
-            return response.send("You have successfully archived this product.")
-        }else{
-            return response.send("An error occurred while attempting to archive this product.")
-        }
-    })
-    .catch(error =>  response.send(error));
-    }else{
-        return response.send("Product is already de-activated")
-    }
+	    if(result.isActive === true){
+	        let archivedProduct = {
+	        		isActive: false	
+	    }
+		    Product.findByIdAndUpdate(reqParams, archivedProduct).then(result => {
+		        if(result){
+		            return response.send(true)//"You have successfully archived this product."
+		        }else{
+		            return response.send(false)//"An error occurred while attempting to archive this product."
+		        }
+		    })
+		    .catch(error =>  response.send(error));
+	    }
 	}).catch(error =>  response.send(error));
 };
 
@@ -122,24 +117,36 @@ module.exports.activateProduct = (request, response) => {
     let reqParams = request.params.productId;
   
     Product.findById(reqParams)
-    .then(result => {
-    	
+    .then(result => {    	
     	if(result.isActive === false){
     	    let activateProduct = {
     	        isActive : true
     	}
-
-    	Product.findByIdAndUpdate(reqParams, activateProduct).then(result => {
-    	    if(result){
-    	        return response.send("You have successfully activate this product.")
-    	    }else{
-    	        return response.send("An error occurred while attempting to activate this product.")
-    	    }
-    	})    	
-    	}else{
-    		return response.send("Product is already Active")
+    		Product.findByIdAndUpdate(reqParams, activateProduct).then(result => {
+	    	    if(result){
+	    	        return response.send(true) //"You have successfully activate this product."
+	    	    }else{
+	    	        return response.send(false) //"An error occurred while attempting to activate this product."
+	    	    }
+	    	})
     	}
     }).catch(error =>  response.send(error));
+};
+
+// Controller to search a product
+module.exports.searchProductsByName = async (req, res) => {
+  try {
+    // Get product name from the request body
+    const { productName } = req.body;
+
+    // Use Mongoose to perform a case-insensitive search by product name
+    const products = await Product.find({ productName: { $regex: new RegExp(productName, 'i') } });
+
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
 

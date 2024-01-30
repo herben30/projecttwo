@@ -7,123 +7,123 @@ const bcrypt = require("bcrypt");
 const auth = require("../auth.js");
 
 module.exports.checkEmailExists = (request, response, next) => {
-	let reqBody = request.body;
+  let reqBody = request.body;
 
-	User.find({email : reqBody.email})
-	.then(result => {
-		if(result.length > 0){
-			return response.send(`The email is already registered. Please use another email.`);
-		}else{
-			next();
-		}
-	})
-	.catch(error => response.send("Error occurred!"));
+  User.find({email : reqBody.email})
+  .then(result => {
+    if(result.length > 0){
+      return response.send({message: "The email is already registered!"}); //`The email is already registered. Please use another email.` response.send({message: "The email is already registered!"});
+    }else{
+      next();
+    }
+  })
+  .catch(error => response.send(false)); //"Error occurred!"
 }
 
 
 // This controller will add user on to our database.
 module.exports.registerUser = (request, response) => {
-	const reqBody = request.body;
+  const reqBody = request.body;
 
-	const newUser = new User({
-		firstName: reqBody.firstName,
-		lastName: reqBody.lastName,
-		email: reqBody.email,
-		password: bcrypt.hashSync(reqBody.password, 10),
-		mobileNo: reqBody.mobileNo
-	})
-	newUser.save().then(save => {
-		return response.send(`${reqBody.email} is now registered!`)
-	}).catch((error) => {
-    console.error("Error encountered during registration:", error);
-    return response.send("Error encountered during registration!");
+  const newUser = new User({
+    firstName: reqBody.firstName,
+    lastName: reqBody.lastName,
+    email: reqBody.email,
+    password: bcrypt.hashSync(reqBody.password, 10),
+    mobileNo: reqBody.mobileNo
+  })
+  newUser.save().then(save => {
+    return response.send(true)//`${reqBody.email} is now registered!`
+  }).catch((error) => {
+    // console.error("Error encountered during registration:", error);
+    return response.send(false);//"Error encountered during registration!"
 });
 }
 
 //controller to login a user and create a token
 module.exports.loginUser = (request, response) => {
-	const reqBody = request.body;
+  const reqBody = request.body;
 
-	User.findOne({email : reqBody.email}).then(result => {
-		if(result === null) {
-			return response.send((`Email does not exist. Register first before logging in!`));
-		}else{
-			const isPasswordCorrect = bcrypt.compareSync(reqBody.password, result.password);
+  User.findOne({email : reqBody.email}).then(result => {
+    if(result === null) {
+      return response.send({message: "Email does not exist!"}) //`Email does not exist. Register first before logging in!`));
+    }else{
+      const isPasswordCorrect = bcrypt.compareSync(reqBody.password, result.password);
 
-			if(isPasswordCorrect){
+      if(isPasswordCorrect){
 
-				const token = auth.createAccessToken(result);
+        const token = auth.createAccessToken(result);
 
-				return response.send({accessToken: token});
+        return response.send({accessToken: token});
 
-			}else{
-				return response.send(`You provided wrong password. Please try again!`);
-			}
-		}
-	})
+      }else{
+        return response.send({message: "You provided wrong password!"});//You provided wrong password. Please try again!
+      }
+    }
+  })
 }
 
 
 
 // Controller to create an order
 module.exports.addToCart = async (req, res) => {
-	//productName
+  //productName
 
-	const { productId, quantity } = req.body;
-	const { user } = req;
+  const { productId, quantity } = req.body;
+  const { user } = req;
 
-	try {
-	  // Find the product details
-	  const product = await Product.findById(productId);
+  try {
+    // Find the product details
+    const product = await Product.findById(productId);
 
-	  if (!product) {
-	    return res.status(404).json({ error: 'Product not found' });
-	  }
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
 
-	  // Retrieve productName from the product details
-	  const productName = product.productName;
+    // Retrieve productName from the product details
+    const productName = product.productName;
 
-	  // Calculate subTotal for the current item
-	  const subTotal = product.price * quantity;
+    // Calculate subTotal for the current item
+    const subTotal = product.price * quantity;
 
-	  // Check if the user has an existing cart
-	  const existingCart = await Cart.findOne({ userId: user.id });
+    // Check if the user has an existing cart
+    const existingCart = await Cart.findOne({ userId: user.id });
 
-	  if (existingCart) {
-	    // User has an existing cart
-	    const existingItemIndex = existingCart.items.findIndex(item => item.productId === productId);
+    if (existingCart) {
+      // User has an existing cart
+      const existingItemIndex = existingCart.items.findIndex(item => item.productId === productId);
 
-	    if (existingItemIndex !== -1) {
-	      // Product already exists in the cart, update quantity and subTotal
-	      existingCart.items[existingItemIndex].quantity += quantity;
-	      existingCart.items[existingItemIndex].subTotal += subTotal;
-	    } else {
-	      // Product doesn't exist in the cart, add a new item
-	      existingCart.items.push({ productId, productName, quantity, subTotal });
-	    }
+      if (existingItemIndex !== -1) {
+        // Product already exists in the cart, update quantity and subTotal
+        existingCart.items[existingItemIndex].quantity += quantity;
+        existingCart.items[existingItemIndex].subTotal += subTotal;
+      } else {
+        // Product doesn't exist in the cart, add a new item
+        existingCart.items.push({ productId, productName, quantity, subTotal });
+      }
 
-	    // Update totalAmount in the existing cart
-	    existingCart.totalAmount += subTotal;
+      // Update totalAmount in the existing cart
+      existingCart.totalAmount += subTotal;
 
 
-	    await existingCart.save();
+      await existingCart.save();
 
-	    res.status(200).json({ message: 'Item added to cart successfully', cart: existingCart });
-	  } else {
-	    // User doesn't have an existing cart, create a new cart
-	    const newCart = new Cart({
-	      userId: user.id,
-	      items: [{ productId, productName, quantity, subTotal }],
-	      totalAmount: subTotal,
-	    });
+      res.status(200).json({ message: 'Item added to cart successfully'}); //, cart: existingCart 
+    } else {
+      // User doesn't have an existing cart, create a new cart
+      const newCart = new Cart({
+        userId: user.id,
+        items: [{ productId, productName, quantity, subTotal }],
+        totalAmount: subTotal,
+      });
 
-	    await newCart.save();
-	    res.status(200).json({ message: 'Item added to cart successfully', cart: newCart });
-	  }
-	} catch (error) {
-	  console.error(error);
-	  res.status(500).json({ error: 'Internal Server Error' });
-	}
+      await newCart.save();
+      res.status(200).json({ message: 'Item added to cart successfully', cart: newCart });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 
 
 
@@ -133,20 +133,15 @@ module.exports.addToCart = async (req, res) => {
 module.exports.getProfile = (request, response) => {
   let user = request.user;
 
-  User.findById(user.id)
-    .select('-isAdmin ')
-    .then((result) => {
-      if (!result) {
-        return response.status(404).send("User not found.");
-      }
-  
+  User.findById(user.id)/*
+    .select('-isAdmin ')*/
+    .then((result) => { 
       // Clearing the password field for security
-      result.password = "";
-  
+      result.password = "";  
       return response.send(result);
+      console.log(result.isAdmin)
     })
-    .catch((error) => response.status(500).send("There was an error encountered during the user retrieval!"));
-  
+   .catch((error) => response.send(false)) //"There was an error encountered during the user retrieval!"
 };
 
 //controller to make the user as admin
@@ -155,23 +150,23 @@ module.exports.makeAdmin = (request, response) => {
   
     User.findById(reqParams)
     .then(result => {
-    	let firstName = result.firstName;
-    	let lastName = result.lastName;
-    	if(result.isAdmin === false){
-    	    let adminUser = {
-    	        isAdmin : true
-    	}
+      let firstName = result.firstName;
+      let lastName = result.lastName;
+      if(result.isAdmin === false){
+          let adminUser = {
+              isAdmin : true
+      }
 
-    	User.findByIdAndUpdate(reqParams, adminUser).then(result => {
-    	    if(result){
-    	        return response.send(`You have successfully make user ${firstName} ${lastName} as Admin.`)
-    	    }else{
-    	        return response.send("An error occurred while attempting to make this user as Admin.")
-    	    }
-    	})    	
-    	}else{
-    		return response.send("User is already an Admin.")
-    	}
+      User.findByIdAndUpdate(reqParams, adminUser).then(result => {
+          if(result){
+              return response.send(`You have successfully make user ${firstName} ${lastName} as Admin.`)
+          }else{
+              return response.send("An error occurred while attempting to make this user as Admin.")
+          }
+      })      
+      }else{
+        return response.send("User is already an Admin.")
+      }
     }).catch(error =>  response.send(error));
 };
 
@@ -185,7 +180,7 @@ module.exports.getCart = (request, response) => {
             if (result) {
                 return response.send(result);
             } else {
-                return response.send("No cart found for the user");
+                return response.send(false); //"No cart found for the user"
             }
         })
         .catch((error) => response.send("There was an error encountered during the user's cart retrieval!"));
@@ -263,6 +258,7 @@ module.exports.checkOut = async (req, res) => {
    res.status(500).json({ error: 'Internal Server Error' });
  }
 }
+
 
 
 //controller to retrieve user's order list 
@@ -394,20 +390,20 @@ module.exports.removeFromCart = async (req, res) => {
 
       await existingCart.save();
 
-      return res.status(200).json({ message: 'Item removed from cart successfully', cart: existingCart });
+      return res.status(200).json(true);//{ message: 'Item removed from cart successfully', cart: existingCart }
     } else {
       // Item not found in the cart
-      return res.status(404).json({ error: 'Item not found in the cart' });
+      return res.status(404).json(false); //{ error: 'Item not found in the cart' }
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server Error' });//
   }
 };
 
 
 module.exports.getAllOrders = async (request, response) => {
-	try {
+  try {
       const orders = await Order.find();
 
       if (orders.length > 0) {
@@ -420,4 +416,44 @@ module.exports.getAllOrders = async (request, response) => {
       return response.status(500).send("There was an error retrieving orders.");
   }
 
-}	
+} 
+
+module.exports.resetPassword = async (req, res) => {
+  try {
+    // Get user ID from the JWT token passed in the authorization headers
+    const userId = req.user.id;
+
+    // Get the new password from the request body
+    const { newPassword } = req.body;
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password in the database
+    await User.findByIdAndUpdate(userId, { password: hashedPassword });
+
+    res.status(200).json({ message: 'Password reset successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
+module.exports.updateProfile = async (req, res) => {
+  try {
+    // Get user ID from the JWT token passed in the authorization headers
+    const userId = req.user.id;
+
+    // Get updated profile information from the request body
+    const { firstName, lastName, mobileNo } = req.body;
+
+    // Update the user's profile in the database
+    await User.findByIdAndUpdate(userId, { firstName, lastName, mobileNo });
+
+    res.status(200).json({ message: 'Profile updated successfully.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
