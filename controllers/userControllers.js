@@ -283,7 +283,7 @@ module.exports.getOrder = (request, response) => {
 module.exports.updateOrderStatus = async (request, response) => {
     try {        
         const orderId = request.params.orderId;
-        const newStatus = request.body.status;
+        const newStatus = request.body;
 
         /*if (newStatus !== "Shipped" && newStatus !== "Delivered") {
             return response.status(400).send({ message: 'Invalid status. Only "Shipped" or "Delivered" are allowed.' });
