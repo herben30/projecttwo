@@ -281,45 +281,45 @@ module.exports.getOrder = (request, response) => {
 
 // controller to update the status of user's order
 module.exports.updateOrderStatus = async (request, response) => {
-    try {        
-        const orderId = request.params.orderId;
-        const newStatus = request.body.status;
+   try {
+       const orderId = request.params.orderId;
+       const newStatus = request.body.status;
 
-        if (newStatus !== "Shipped" && newStatus !== "Delivered") {
-            return response.status(400).send({ message: 'Invalid status. Only "Shipped" or "Delivered" are allowed.' });
-        }
+       if (newStatus !== "Shipped" && newStatus !== "Delivered") {
+           return response.status(400).send({ message: 'Invalid status. Only "Shipped" or "Delivered" are allowed.' });
+       }
 
-        const updatedOrder = await Order.findByIdAndUpdate(
-            orderId,
-            { $set: { status: newStatus } },
-            { new: true }
-        );
+       const updatedOrder = await Order.findByIdAndUpdate(
+           orderId,
+           { $set: { status: newStatus } },
+           { new: true }
+       );
 
-        if (!updatedOrder) {
-            return response.status(404).send({ message: 'Order not found.' });
-        }
+       if (!updatedOrder) {
+           return response.status(404).send({ message: 'Order not found.' });
+       }
 
-        const userDetails = await User.findById(updatedOrder.userId);
+       const userDetails = await User.findById(updatedOrder.userId);
 
-        if (!userDetails) {
-          return res.status(404).json({ error: 'User not found' });
-        }
+       if (!userDetails) {
+           return response.status(404).json({ error: 'User not found' });
+       }
 
-        const order = userDetails.orderedItems.find(item => item.orderId === orderId);
+       const order = userDetails.orderedItems.find(item => item.orderId === orderId);
 
-        if (!order) {
-          return res.status(404).json({ error: 'Order not found' });
-        }
+       if (!order) {
+           return response.status(404).json({ error: 'Order not found' });
+       }
 
-        order.status = newStatus;
-        await userDetails.save();
+       order.status = newStatus;
+       await userDetails.save();
 
+       return response.send(updatedOrder.status); // { message: `Order status updated successfully.`, order: updatedOrder }
+   } catch (error) {
+       console.error(error);
+       return response.status(500).send("There was an error updating the order status.");
+   }
 
-        return response.send(updatedOrder.status);//{ message: `Order status updated successfully.`, order: updatedOrder }
-    } catch (error) {
-        console.error(error);
-        return response.status(500).send("There was an error updating the order status.");
-    }
 };
 
 //controller to change the quantities in the cart
