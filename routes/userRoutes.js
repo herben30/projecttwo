@@ -43,13 +43,13 @@ router.post('/checkout', verify, userControllers.checkOut); //done
 router.get('/order', verify, userControllers.getOrder); //done
 
 //route to update the quanties customer cart
-router.post('/change-quantities', verify, userControllers.updateCartQuantity);
+router.post('/change-quantities', verify, userControllers.updateCartQuantity); //done
+
+//route to retrive every user's order
+router.get('/allorder', verify, verifyAdmin, userControllers.getAllOrders);
 
 //route to update the status of user's order.
 router.put('/orderstatus/:orderId', verify, verifyAdmin, userControllers.updateOrderStatus);
-
-//route to retrive every user's order
-router.get('/allOrders', verify, verifyAdmin, userControllers.getAllOrders);
 
 // To make our router exportable
 module.exports = router;
