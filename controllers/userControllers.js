@@ -409,7 +409,7 @@ module.exports.getAllOrders = async (request, response) => {
       const orders = await Order.find();
 
       if (orders.length > 0) {
-          return response.send({ message:"hellp" });
+          return response.send(result);
       } else {
           return response.send("No orders found.");
       }
