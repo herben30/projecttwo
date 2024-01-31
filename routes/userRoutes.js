@@ -43,7 +43,7 @@ router.post('/checkout', verify, userControllers.checkOut); //done
 router.get('/order', verify, userControllers.getOrder); //done
 
 //route to update the quanties customer cart
-router.put('/change-quantities', verify, userControllers.updateCartQuantity);
+router.post('/change-quantities', verify, userControllers.updateCartQuantity);
 
 //route to update the status of user's order.
 router.put('/orderstatus/:orderId', verify, verifyAdmin, userControllers.updateOrderStatus);
