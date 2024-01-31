@@ -159,7 +159,7 @@ module.exports.makeAdmin = (request, response) => {
 
       User.findByIdAndUpdate(reqParams, adminUser).then(result => {
           if(result){
-              return response.send(`You have successfully make user ${firstName} ${lastName} as Admin.`)
+              return response.send(`You have successfully make user as Admin.`)//${firstName} ${lastName} 
           }else{
               return response.send("An error occurred while attempting to make this user as Admin.")
           }
