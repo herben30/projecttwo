@@ -10,7 +10,7 @@ const {verify, verifyAdmin} = auth; //deconstruct
 
 
 //route to activate a product by admin.
-router.put("/admin/:userId", verify, verifyAdmin, userControllers.makeAdmin);.
+router.put("/admin/:userId", verify, verifyAdmin, userControllers.makeAdmin);
 
 router.get("/all", verify, verifyAdmin, userControllers.getAllUsers)
 
