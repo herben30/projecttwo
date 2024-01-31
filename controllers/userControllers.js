@@ -356,9 +356,9 @@ module.exports.updateCartQuantity = async (req, res) => {
 
       await existingCart.save();
 
-      return res.status(200).json({ message: 'Cart updated successfully', cart: existingCart });
+      return res.status(200).json(true);//{ message: 'Cart updated successfully', cart: existingCart }
     } else {
-      return res.status(404).json({ error: 'Item not found in the cart' });
+      return res.status(404).json(false);//{ error: 'Item not found in the cart' }
     }
   } catch (error) {
     console.error(error);

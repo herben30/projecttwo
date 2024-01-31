@@ -40,7 +40,7 @@ router.delete('/:productId',verify, userControllers.removeFromCart); //done
 router.post('/checkout', verify, userControllers.checkOut); //done
 
 //route to retrieve the user's order
-router.get('/order', verify, userControllers.getOrder);
+router.get('/order', verify, userControllers.getOrder); //done
 
 //route to update the quanties customer cart
 router.put('/change-quantities', verify, userControllers.updateCartQuantity);
