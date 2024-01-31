@@ -315,7 +315,7 @@ module.exports.updateOrderStatus = async (request, response) => {
         await userDetails.save();
 
 
-        return response.send({ message: `Order status updated successfully.`, order: updatedOrder });
+        return response.send(updatedOrder.status);//{ message: `Order status updated successfully.`, order: updatedOrder }
     } catch (error) {
         console.error(error);
         return response.status(500).send("There was an error updating the order status.");

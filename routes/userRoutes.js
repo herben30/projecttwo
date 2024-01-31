@@ -46,7 +46,7 @@ router.get('/order', verify, userControllers.getOrder); //done
 router.post('/change-quantities', verify, userControllers.updateCartQuantity); //done
 
 //route to retrive every user's order
-router.get('/allorder', verify, verifyAdmin, userControllers.getAllOrders);
+router.get('/allorder', verify, verifyAdmin, userControllers.getAllOrders); //done
 
 //route to update the status of user's order.
 router.put('/orderstatus/:orderId', verify, verifyAdmin, userControllers.updateOrderStatus);
