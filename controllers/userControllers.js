@@ -459,3 +459,16 @@ module.exports.updateProfile = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+module.exports.getAllUsers = (request, response) => {
+  User.find({})  
+    .then(result => {
+      if (result.length === 0) {
+        response.send(false); //"No products found in the database."
+      } else {
+        response.send(result);
+      }
+    })
+    .catch(error => response.send(error));
+
+};

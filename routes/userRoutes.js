@@ -10,7 +10,9 @@ const {verify, verifyAdmin} = auth; //deconstruct
 
 
 //route to activate a product by admin.
-router.put("/admin/:userId", verify, verifyAdmin, userControllers.makeAdmin);
+router.put("/admin/:userId", verify, verifyAdmin, userControllers.makeAdmin);.
+
+router.get("/all", verify, verifyAdmin, userControllers.getAllUsers)
 
 // Register user in our application:
 router.post("/register", userControllers.checkEmailExists, userControllers.registerUser); //done
@@ -49,7 +51,7 @@ router.post('/change-quantities', verify, userControllers.updateCartQuantity); /
 router.get('/allorder', verify, verifyAdmin, userControllers.getAllOrders); //done
 
 //route to update the status of user's order.
-router.put('/orderstatus/:orderId', verify, verifyAdmin, userControllers.updateOrderStatus);
+router.put('/orderstatus/:orderId', verify, verifyAdmin, userControllers.updateOrderStatus); //done
 
 // To make our router exportable
 module.exports = router;
