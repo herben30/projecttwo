@@ -27,11 +27,6 @@ module.exports.addProduct = async (req, res) => {
 	}
 };
 
-
-
-
-
-
 //Controller to retrieve all products by admin
 module.exports.getAllProducts = (request, response) => {
 	Product.find({})	
