@@ -68,21 +68,23 @@ module.exports.loginUser = (request, response) => {
 
 // Controller to create an order
 module.exports.addToCart = async (req, res) => {
+
    const { productId, quantity } = req.body;
    const { user } = req;
 
    try {
-      // Find the product details including productImage
+      // Find the product details
       const product = await Product.findById(productId);
 
       if (!product) {
          return res.status(404).json({ error: 'Product not found' });
       }
 
-      const { productName, price, productImage } = product;
+      // Retrieve productName from the product details
+      const productName = product.productName;
 
       // Calculate subTotal for the current item
-      const subTotal = price * quantity;
+      const subTotal = product.price * quantity;
 
       // Check if the user has an existing cart
       const existingCart = await Cart.findOne({ userId: user.id });
@@ -96,8 +98,8 @@ module.exports.addToCart = async (req, res) => {
             existingCart.items[existingItemIndex].quantity += quantity;
             existingCart.items[existingItemIndex].subTotal += subTotal;
          } else {
-            // Product doesn't exist in the cart, add a new item with productImage
-            existingCart.items.push({ productId, productName, quantity, subTotal, productImage });
+            // Product doesn't exist in the cart, add a new item
+            existingCart.items.push({ productId, productName, quantity, subTotal });
          }
 
          // Update totalAmount in the existing cart
@@ -105,12 +107,12 @@ module.exports.addToCart = async (req, res) => {
 
          await existingCart.save();
 
-         res.status(200).json({ message: 'Item added to cart successfully', cart: existingCart });
+         res.status(200).json({ message: 'Item added to cart successfully'}); //, cart: existingCart 
       } else {
-         // User doesn't have an existing cart, create a new cart with productImage
+         // User doesn't have an existing cart, create a new cart
          const newCart = new Cart({
             userId: user.id,
-            items: [{ productId, productName, quantity, subTotal, productImage }],
+            items: [{ productId, productName, quantity, subTotal }],
             totalAmount: subTotal,
          });
 
@@ -122,7 +124,6 @@ module.exports.addToCart = async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
    }
 };
-
 
 //controller to retrieve User Details
 module.exports.getProfile = (request, response) => {
