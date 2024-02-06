@@ -3,69 +3,81 @@ const bcrypt = require("bcrypt");
 const auth = require("../auth.js");
 
 //Controller to add new products
-module.exports.addProduct = (request, response) => {
-	let reqBody = request.body;
+module.exports.addProduct = async (req, res) => {
+	const { productName, description, price } = req.body;
 
-	const newProduct = new Product({
-	    productName: reqBody.productName,
-	    description: reqBody.description,
-	    price: reqBody.price
-	});
+	try {
+		const newProduct = await Product.create({
+			productName,
+			description,
+			price,
+			productImage: req.file.filename,
+		});
 
-	newProduct.save()
-	    .then(product => {
-	        // Product creation successful
-	        return response.send(true);//`New Product ${reqBody.name} successfully added.`
-	    })
-	    .catch(error => {
-	        // Product creation failed
-	        return response.send(false);//"There's an error adding the new product."
-	    });
+		res.status(201).json({
+			status: 'success',
+			data: newProduct,
+		});
+	} catch (error) {
+		console.error('Error adding product:', error);
+		res.status(500).json({
+			status: 'error',
+			message: 'Internal Server Error',
+		});
+	}
 };
+
+
+
+
+
 
 //Controller to retrieve all products by admin
 module.exports.getAllProducts = (request, response) => {
 	Product.find({})	
-	  .then(result => {
-	    if (result.length === 0) {
-	      response.send(false); //"No products found in the database."
-	    } else {
-	      response.send(result);
-	    }
-	  })
-	  .catch(error => response.send(error));
-
+	.then(result => {
+		if (result.length === 0) {
+			response.send(false); //"No products found in the database."
+		} else {
+			response.send(result);
+		}
+	})
+	.catch(error => response.send(error));
 };
 
 //Controller to retrieve all active products
 module.exports.getAllActiveProducts = (request, response) => {
-	Product.find({ isActive: true })/*
-	  .select('-isActive -userOrders') */// Include isActive, exclude userOrders
-	  .then(result => {
-	    if (result.length === 0) {
-	      response.send("No active products found in the database.");
-	    } else {
-	      response.send(result);
-	    }
-	  })
-	  .catch(error => response.send(error));
+	Product.find({ isActive: true })
+	.then(result => {
+		if (result.length === 0) {
+			response.send("No active products found in the database.");
+		} else {
+			response.send(result);
+		}
+	})
+	.catch(error => response.send(error));
 };
 
 //Controller to retrieve a specific product by product id
 module.exports.getProduct = (request, response) => {
 	let reqParams = request.params.productId;
 
-	Product.findById(reqParams)/*
-	  .select(' -userOrders')*/
-	  .then(result => {
-	    if (!result) {
-	      response.status(404).send("Product not found.");
-	    } else {
-	      response.send(result);
-	    }
-	  })
-	  .catch(error => response.send(error));
+	Product.findById(reqParams)
+	.then(result => {
+		if (!result) {
+			response.status(404).send("Product not found.");
+		} else {
+			const { productName, description, price, productImage } = result;
 
+			response.send({
+				productName,
+				description,
+				price,
+				productImage,
+			});
+		}
+	})
+	.catch(error => response.send(error));
 };
 
 //Controller to modify the details of a specific product
@@ -135,18 +147,19 @@ module.exports.activateProduct = (request, response) => {
 
 // Controller to search a product
 module.exports.searchProductsByName = async (req, res) => {
-  try {
-    // Get product name from the request body
-    const { productName } = req.body;
+	try {
+		// Get product name from the request body
+		const { productName } = req.body;
 
-    // Use Mongoose to perform a case-insensitive search by product name
-    const products = await Product.find({ productName: { $regex: new RegExp(productName, 'i') } });
+		// Use Mongoose to perform a case-insensitive search by product name
+		const products = await Product.find({
+			productName: { $regex: new RegExp(productName, 'i') },
+			isActive: true // Assuming 'isActive' is the field that determines if a product is active
+		});
 
-    res.status(200).json({ products });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+		res.status(200).json({ products });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: 'Internal Server Error' });
+	}
 };
-
-

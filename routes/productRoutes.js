@@ -2,35 +2,49 @@ const express = require("express");
 const productControllers = require("../controllers/productControllers.js");
 const auth = require("../auth.js");
 
+const multer = require('multer');
+const path = require("path");
+
 // Router
 const router = express.Router();
 
-const {verify, verifyAdmin} = auth; //deconstruct
+const { verify, verifyAdmin } = auth; // destructure
 
-//route to add new product
-router.post(`/`, verify, verifyAdmin, productControllers.addProduct); //done
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
 
-//route to retriece all products by admin.
-router.get("/all", verify, verifyAdmin, productControllers.getAllProducts); //done
+const upload = multer({
+    storage: storage
+});
 
-//route to retrieve all active products by any users.
-router.get("/active", productControllers.getAllActiveProducts); //done
+// Route to add a new product
+router.post("/", upload.single("productImage"), verify, verifyAdmin, productControllers.addProduct);
 
-//route to search a product using name
-router.post('/search', productControllers.searchProductsByName); //need to search an item for admin as well
+// Route to retrieve all products by admin
+router.get("/all", verify, verifyAdmin, productControllers.getAllProducts);
 
-//route to retrive a specific product using id.
-router.get("/:productId", productControllers.getProduct); //done
+// Route to retrieve all active products by any user
+router.get("/active", productControllers.getAllActiveProducts);
 
-//route to modify the details of a specific product by admin.
-router.put("/:productId", verify, verifyAdmin, productControllers.updateProduct); //done
+// Route to search a product by name (for both admin and users)
+router.post('/search', productControllers.searchProductsByName);
 
-//route to archive a product by admin.
-router.put("/archive/:productId", verify, verifyAdmin, productControllers.archiveProduct); //done
+// Route to retrieve a specific product by id
+router.get("/:productId", productControllers.getProduct);
 
-//route to activate a product by admin.
-router.put("/activate/:productId", verify, verifyAdmin, productControllers.activateProduct); //done
+// Route to modify the details of a specific product by admin
+router.put("/:productId", verify, verifyAdmin, productControllers.updateProduct);
 
+// Route to archive a product by admin
+router.put("/archive/:productId", verify, verifyAdmin, productControllers.archiveProduct);
 
+// Route to activate a product by admin
+router.put("/activate/:productId", verify, verifyAdmin, productControllers.activateProduct);
 
 module.exports = router;
