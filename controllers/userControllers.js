@@ -198,8 +198,10 @@ module.exports.checkOut = async (req, res) => {
       const orderItems = userCart.items.map(item => ({
          productId: item.productId,
          productName: item.productName,
+         productImage: item.productImage,
          quantity: item.quantity,
          subTotal: item.subTotal,
+
       }));
 
       // Calculate the total amount from the cart
