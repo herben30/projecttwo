@@ -1,6 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const path = require("path");
+
 const multer = require("multer");
 const userRoutes = require("./routes/userRoutes.js");
 const productRoutes = require("./routes/productRoutes.js");
@@ -26,11 +26,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // Allows all resources to access our backend application
 app.use(cors());
-app.use("/b1/users", userRoutes);
-app.use("/b1/products", productRoutes);
+app.use("/users", userRoutes);
+app.use("/products", productRoutes);
+app.use("/expenses", expenseRoutes);
 
 // Expose the 'uploads' folder
-app.use('/b1/uploads', express.static('uploads'));
+app.use('/uploads', express.static('uploads'));
 
 app.listen(port, () => {
     console.log(`API is now online on port ${port}!`);
